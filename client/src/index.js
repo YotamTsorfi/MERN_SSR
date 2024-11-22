@@ -4,9 +4,13 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
+console.log("TEST");
+const data = JSON.parse(document.getElementById("app_data")); //application data
+console.log(data);
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
+const rootElement = document.getElementById("root");
+ReactDOM.hydrateRoot(
+  rootElement,
   // <React.StrictMode>
   <BrowserRouter>
     <App />

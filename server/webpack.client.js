@@ -4,7 +4,8 @@ const { merge } = require("webpack-merge");
 const common = require("./webpack.common.js");
 
 module.exports = merge(common, {
-  mode: "production", // הוסף את השורה הזו
+  mode: "development", // הוסף את השורה הזו
+  watch: true,
   entry: "../client/src/index.js", // עדכן את הנתיב בהתאם למיקום הקובץ שלך
   output: {
     path: path.resolve(__dirname, "../client/build"),
@@ -12,11 +13,11 @@ module.exports = merge(common, {
     publicPath: "/",
   },
   plugins: [
-    new HtmlWebpackPlugin({
-      template: "../client/public/index.html", // עדכן את הנתיב בהתאם למיקום הקובץ שלך
-      filename: "index.html",
-      inject: true,
-    }),
+    // new HtmlWebpackPlugin({
+    //   template: "../client/public/index.html", // עדכן את הנתיב בהתאם למיקום הקובץ שלך
+    //   filename: "index.html",
+    //   inject: true,
+    // }),
   ],
   devServer: {
     historyApiFallback: true,

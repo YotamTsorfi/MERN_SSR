@@ -4,7 +4,7 @@ const { merge } = require("webpack-merge");
 const common = require("./webpack.common.js");
 
 module.exports = merge(common, {
-  mode: "production",
+  mode: "development",
   entry: "./server.js",
   target: "node",
   externals: [nodeExternals()],

@@ -5,8 +5,8 @@ require("@babel/register")({
 import express from "express";
 import React from "react";
 import { renderToString } from "react-dom/server";
-import path from "path";
-import fs from "fs";
+import path from "node:path";
+import fs from "node:fs";
 import { StaticRouter } from "react-router-dom/server";
 
 import App from "../client/src/App";
@@ -15,7 +15,11 @@ global.window = {};
 
 const app = express();
 
-app.use(express.static(path.resolve(__dirname, "../../client/build")));
+app.use(
+  express.static(path.resolve(__dirname, "../../client/build"), {
+    index: false,
+  })
+);
 
 const articles = [
   { id: 1, title: "First Article", content: "Hello from the first article" },
@@ -29,31 +33,36 @@ app.get("/api/articles", (req, res) => {
 });
 
 app.get("/*", (req, res) => {
-  const filePath = path.resolve(__dirname, "../../client/build", "index.html");
-  fs.readFile(filePath, "utf8", (err, htmlData) => {
-    if (err) {
-      console.error("Could not read index.html file", err);
-      return res.status(500).send("Error reading index.html");
-    }
+  const reactApp = renderToString(
+    <StaticRouter location={req.url}>
+      <App />
+    </StaticRouter>
+  );
 
-    const reactApp = renderToString(
-      <StaticRouter location={req.url}>
-        <App />
-      </StaticRouter>
-    );
+  const loadedArticles = articles;
+  console.log("TEST", loadedArticles);
 
-    const loadedArticles = articles;
-
-    return res.send(
-      htmlData.replace(
-        '<div id="root"></div>',
-        `<script>window.preloadedArticles = ${JSON.stringify(
+  // Placing the Articles data in the HTML and having the
+  // React app rendering it after it's get to the client
+  return res.send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>My App 2</title>
+      </head>
+      <body>
+        <div id="root">${reactApp}</div>
+        <script type="application/json" id="app_data">${JSON.stringify(
           loadedArticles
-        )}</script>`,
-        `<div id="root">${reactApp}</div>`
-      )
-    );
-  });
+        )}</script>
+        <script>
+          window.__INITIAL_DATA__ = ${JSON.stringify(loadedArticles)};
+        </script>
+      </body>
+      </html>
+    `);
 });
 
 const PORT = 8080;
