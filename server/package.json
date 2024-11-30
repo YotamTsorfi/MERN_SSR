@@ -5,24 +5,28 @@
   "main": "server.js",
   "scripts": {
     "build-client": "webpack --config webpack.client.js",
-    "build-server": "webpack --config webpack.server.js --watch ",
-    "build": "concurrently \" npm run build-client \"  \"npm run build-server\" ",
+    "build-server": "webpack --config webpack.server.js --watch",
+    "build": "concurrently \"npm run build-client\" \"npm run build-server\"",
     "start": "node build-server/server.js",
-    "start-dev": "nodemon ./build-server/server.js --watch ./build-server/* --watch ../client/build/*"
+    "start-webpack-dev-server": "webpack serve --config webpack-dev-server.js",
+    "start-nodemon": "nodemon ./build-server/server.js --watch ./build-server/* --watch ../client/build/*",
+    "start-dev": "concurrently \"npm run start-webpack-dev-server\" \"npm run start-nodemon\""
   },
   "author": "Yotam Tsorfy Shaked",
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.26.0",
-    "@babel/node": "^7.26.0",
     "@babel/preset-env": "^7.26.0",
     "@babel/preset-react": "^7.25.9",
     "babel-loader": "^9.2.1",
+    "browser-sync": "^2.29.3",
+    "browser-sync-webpack-plugin": "^2.3.0",
     "css-loader": "^7.1.2",
     "html-webpack-plugin": "^5.6.3",
     "style-loader": "^4.0.0",
     "webpack": "^5.96.1",
     "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.1.0",
     "webpack-merge": "^6.0.1",
     "webpack-node-externals": "^3.0.0"
   },

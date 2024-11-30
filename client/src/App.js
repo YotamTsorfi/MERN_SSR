@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
 import Articles from "./pages/Articles";
@@ -9,10 +9,24 @@ const BigGreenHeading = styled.h1`
   font-size: 96px;
 `;
 
-const App = () => {
+const App = ({ initialData }) => {
+  const [articles, setArticles] = useState(initialData || []);
+
+  useEffect(() => {
+    if (!initialData) {
+      fetch("/api/articles")
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Fetched articles:", data);
+          setArticles(data);
+        })
+        .catch((error) => console.error("Error fetching articles:", error));
+    }
+  }, [initialData]);
+
   return (
     <>
-      <BigGreenHeading>App</BigGreenHeading>
+      <BigGreenHeading>Job Finder</BigGreenHeading>
       <ul>
         <li>
           <Link to="/">Home</Link>
@@ -24,7 +38,7 @@ const App = () => {
 
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/articles" element={<Articles />} />
+        <Route path="/articles" element={<Articles articles={articles} />} />
       </Routes>
     </>
   );

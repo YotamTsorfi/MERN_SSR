@@ -6,12 +6,14 @@ import express from "express";
 import React from "react";
 import { renderToString } from "react-dom/server";
 import path from "node:path";
-import fs from "node:fs";
 import { StaticRouter } from "react-router-dom/server";
 
 import App from "../client/src/App";
 
-global.window = {};
+// Define global.window only if it is not already defined
+if (typeof global.window === "undefined") {
+  global.window = {};
+}
 
 const app = express();
 
@@ -19,6 +21,11 @@ app.use(
   express.static(path.resolve(__dirname, "../../client/build"), {
     index: false,
   })
+);
+
+app.use(
+  "/favicon.ico",
+  express.static(path.join(__dirname, "../../client/public", "favicon.ico"))
 );
 
 const articles = [
@@ -33,33 +40,39 @@ app.get("/api/articles", (req, res) => {
 });
 
 app.get("/*", (req, res) => {
+  const context = {};
   const reactApp = renderToString(
-    <StaticRouter location={req.url}>
-      <App />
+    <StaticRouter location={req.url} context={context}>
+      <App initialData={articles} />
     </StaticRouter>
   );
 
-  const loadedArticles = articles;
-  console.log("TEST", loadedArticles);
+  // Check if a redirect occurred during rendering
+  if (context.url) {
+    return res.redirect(301, context.url);
+  }
 
-  // Placing the Articles data in the HTML and having the
-  // React app rendering it after it's get to the client
-  return res.send(`
+  // Set the status code based on the context
+  const status = context.statusCode || 200;
+
+  return res.status(status).send(`
       <!DOCTYPE html>
       <html lang="en">
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>My App 2</title>
+        <title>Job Finder</title>
+        <link rel="icon" href="/favicon.ico">
+        <script type="application/json" id="app_data">${JSON.stringify(
+          articles
+        )}</script>
       </head>
       <body>
         <div id="root">${reactApp}</div>
-        <script type="application/json" id="app_data">${JSON.stringify(
-          loadedArticles
-        )}</script>
         <script>
-          window.__INITIAL_DATA__ = ${JSON.stringify(loadedArticles)};
+          window.__INITIAL_DATA__ = ${JSON.stringify(articles)};
         </script>
+        <script src="/bundle.js"></script>
       </body>
       </html>
     `);

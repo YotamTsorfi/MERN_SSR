@@ -4,19 +4,31 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
-console.log("TEST");
-const data = JSON.parse(document.getElementById("app_data")); //application data
-console.log(data);
+
+const dataElement = document.getElementById("app_data");
+const data = dataElement ? JSON.parse(dataElement.textContent) : null;
+
+console.log("Initial data from server:", data);
 
 const rootElement = document.getElementById("root");
-ReactDOM.hydrateRoot(
+const root = ReactDOM.hydrateRoot(
   rootElement,
-  // <React.StrictMode>
   <BrowserRouter>
-    <App />
+    <App initialData={data} />
   </BrowserRouter>
-  // </React.StrictMode>
 );
+
+// Support for Hot Module Replacement (HMR)
+if (module.hot) {
+  module.hot.accept("./App", () => {
+    const NextApp = require("./App").default;
+    root.render(
+      <BrowserRouter>
+        <NextApp initialData={data} />
+      </BrowserRouter>
+    );
+  });
+}
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
